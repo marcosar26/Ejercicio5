@@ -1,13 +1,12 @@
 package es.marcosar.ejercicio5.service;
 
+import es.marcosar.ejercicio5.dto.HabitacionDto;
 import es.marcosar.ejercicio5.model.Habitacion;
 import es.marcosar.ejercicio5.repository.HabitacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -15,22 +14,26 @@ public class HabitacionService {
     @Autowired
     private HabitacionRepository habitacionRepository;
 
-    public List<Habitacion> findAll() {
-        return StreamSupport.stream(habitacionRepository.findAll().spliterator(), false).toList();
+    private HabitacionDto mapToDto(Habitacion habitacion) {
+        return new HabitacionDto(habitacion.getNumero(), habitacion.getTipo(), habitacion.getPrecio());
     }
 
-    public Habitacion add(Habitacion habitacion) {
-        return habitacionRepository.save(habitacion);
+    public List<HabitacionDto> findAll() {
+        return StreamSupport.stream(habitacionRepository.findAll().spliterator(), false)
+                .map(this::mapToDto)
+                .toList();
     }
 
-    public Habitacion update(Long id, Habitacion habitacion) {
-        Optional<Habitacion> opt = habitacionRepository.findById(id);
+    public List<HabitacionDto> findAllDisponibles() {
+        return habitacionRepository.findByDisponible(true).stream().map(this::mapToDto).toList();
+    }
 
-        if (opt.isEmpty()) {
-            throw new NoSuchElementException("No existe el cliente con id " + id);
-        }
+    public HabitacionDto add(Habitacion habitacion) {
+        return mapToDto(habitacionRepository.save(habitacion));
+    }
 
-        Habitacion h = opt.get();
+    public HabitacionDto update(Long id, Habitacion habitacion) {
+        Habitacion h = habitacionRepository.findById(id).orElseThrow();
 
         h.setNumero(habitacion.getNumero());
         h.setTipo(habitacion.getTipo());
@@ -39,16 +42,11 @@ public class HabitacionService {
         h.setDisponible(habitacion.getDisponible());
         h.setReservas(habitacion.getReservas());
 
-        return habitacionRepository.save(h);
+        return mapToDto(habitacionRepository.save(h));
     }
 
     public void delete(Long id) {
-        Optional<Habitacion> opt = habitacionRepository.findById(id);
-
-        if (opt.isEmpty()) {
-            throw new NoSuchElementException("No existe el cliente con id " + id);
-        }
-
-        habitacionRepository.deleteById(id);
+        Habitacion h = habitacionRepository.findById(id).orElseThrow();
+        habitacionRepository.delete(h);
     }
 }

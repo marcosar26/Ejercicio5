@@ -41,12 +41,7 @@ public class ReservaService {
     }
 
     public void delete(Long id) {
-        Optional<Reserva> opt = reservaRepository.findById(id);
-
-        if (opt.isEmpty()) {
-            throw new NoSuchElementException("No existe el cliente con id " + id);
-        }
-
-        reservaRepository.deleteById(id);
+        Reserva r = reservaRepository.findById(id).orElseThrow();
+        reservaRepository.delete(r);
     }
 }
