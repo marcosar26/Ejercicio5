@@ -1,7 +1,8 @@
 package es.marcosar.ejercicio5.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,6 +11,10 @@ import java.util.List;
 
 @Data
 @Entity
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class Habitacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +33,5 @@ public class Habitacion {
     private Boolean disponible;
 
     @OneToMany(mappedBy = "habitacion", orphanRemoval = true)
-    @JsonManagedReference
     private List<Reserva> reservas = new ArrayList<>();
 }

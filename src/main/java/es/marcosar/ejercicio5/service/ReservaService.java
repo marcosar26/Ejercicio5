@@ -1,6 +1,11 @@
 package es.marcosar.ejercicio5.service;
 
+import es.marcosar.ejercicio5.dto.CrearReservaDTO;
+import es.marcosar.ejercicio5.model.Cliente;
+import es.marcosar.ejercicio5.model.Habitacion;
 import es.marcosar.ejercicio5.model.Reserva;
+import es.marcosar.ejercicio5.repository.ClienteRepository;
+import es.marcosar.ejercicio5.repository.HabitacionRepository;
 import es.marcosar.ejercicio5.repository.ReservaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,9 +19,32 @@ import java.util.stream.StreamSupport;
 public class ReservaService {
     @Autowired
     private ReservaRepository reservaRepository;
+    @Autowired
+    private ClienteRepository clienteRepository;
+    @Autowired
+    private HabitacionRepository habitacionRepository;
 
     public List<Reserva> findAll() {
         return StreamSupport.stream(reservaRepository.findAll().spliterator(), false).toList();
+    }
+
+    public List<Reserva> findAllByClienteId(Long id) {
+        return reservaRepository.findByCliente_Id(id);
+    }
+
+    public Reserva crearReserva(Long cliente_id, Long habitacion_id, CrearReservaDTO dto) {
+        Cliente cliente = clienteRepository.findById(cliente_id).orElseThrow();
+
+        Habitacion habitacion = habitacionRepository.findById(habitacion_id).orElseThrow();
+
+        Reserva reserva = new Reserva(
+                cliente,
+                habitacion,
+                dto.getFecha_checkin(),
+                dto.getFecha_checkout()
+        );
+
+        return reservaRepository.save(reserva);
     }
 
     public Reserva add(Reserva reserva) {

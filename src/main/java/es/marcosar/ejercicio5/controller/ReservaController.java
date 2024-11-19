@@ -1,5 +1,6 @@
 package es.marcosar.ejercicio5.controller;
 
+import es.marcosar.ejercicio5.dto.CrearReservaDTO;
 import es.marcosar.ejercicio5.model.Reserva;
 import es.marcosar.ejercicio5.service.ReservaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,20 @@ public class ReservaController {
     public ResponseEntity<List<Reserva>> findAll() {
         List<Reserva> reservas = reservaService.findAll();
         return reservas.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(reservas);
+    }
+
+    @GetMapping("/cliente")
+    public ResponseEntity<List<Reserva>> findAllByClienteId(Long id) {
+        List<Reserva> reservas = reservaService.findAllByClienteId(id);
+        return reservas.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(reservas);
+    }
+
+    @PutMapping("/crear")
+    public ResponseEntity<Reserva> crear(@RequestParam Long cliente_id,
+                                         @RequestParam Long habitacion_id,
+                                         @RequestBody CrearReservaDTO dto) {
+        Reserva reserva = reservaService.crearReserva(cliente_id, habitacion_id, dto);
+        return reserva == null ? ResponseEntity.badRequest().build() : ResponseEntity.ok(reserva);
     }
 
     @PutMapping
