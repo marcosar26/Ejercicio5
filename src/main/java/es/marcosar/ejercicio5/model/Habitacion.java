@@ -1,6 +1,7 @@
 package es.marcosar.ejercicio5.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -33,5 +34,6 @@ public class Habitacion {
     private Boolean disponible;
 
     @OneToMany(mappedBy = "habitacion", orphanRemoval = true)
+    @JsonManagedReference(value = "habitacion-reservas")
     private List<Reserva> reservas = new ArrayList<>();
 }

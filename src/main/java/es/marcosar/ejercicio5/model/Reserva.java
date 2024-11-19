@@ -1,5 +1,6 @@
 package es.marcosar.ejercicio5.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -26,10 +27,12 @@ public class Reserva {
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
+    @JsonBackReference(value = "cliente-reservas")
     private Cliente cliente;
 
     @ManyToOne
     @JoinColumn(name = "habitacion_id")
+    @JsonBackReference(value = "habitacion-reservas")
     private Habitacion habitacion;
 
     private LocalDateTime fecha_checkin;

@@ -1,6 +1,7 @@
 package es.marcosar.ejercicio5.service;
 
 import es.marcosar.ejercicio5.dto.CrearReservaDTO;
+import es.marcosar.ejercicio5.dto.ReservaDto;
 import es.marcosar.ejercicio5.model.Cliente;
 import es.marcosar.ejercicio5.model.Habitacion;
 import es.marcosar.ejercicio5.model.Reserva;
@@ -10,6 +11,7 @@ import es.marcosar.ejercicio5.repository.ReservaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -24,15 +26,25 @@ public class ReservaService {
     @Autowired
     private HabitacionRepository habitacionRepository;
 
-    public List<Reserva> findAll() {
-        return StreamSupport.stream(reservaRepository.findAll().spliterator(), false).toList();
+    private ReservaDto mapToDto(Reserva reserva) {
+        return new ReservaDto(
+                reserva.getId(),
+                reserva.getCliente().getId(),
+                reserva.getHabitacion().getId(),
+                reserva.getFecha_checkin(),
+                reserva.getFecha_checkout()
+        );
     }
 
-    public List<Reserva> findAllByClienteId(Long id) {
-        return reservaRepository.findByCliente_Id(id);
+    public List<ReservaDto> findAll() {
+        return StreamSupport.stream(reservaRepository.findAll().spliterator(), false).map(this::mapToDto).toList();
     }
 
-    public Reserva crearReserva(Long cliente_id, Long habitacion_id, CrearReservaDTO dto) {
+    public List<ReservaDto> findAllByClienteId(Long id) {
+        return reservaRepository.findByCliente_Id(id).stream().map(this::mapToDto).toList();
+    }
+
+    public ReservaDto crearReserva(Long cliente_id, Long habitacion_id, CrearReservaDTO dto) {
         Cliente cliente = clienteRepository.findById(cliente_id).orElseThrow();
 
         Habitacion habitacion = habitacionRepository.findById(habitacion_id).orElseThrow();
@@ -44,14 +56,26 @@ public class ReservaService {
                 dto.getFecha_checkout()
         );
 
-        return reservaRepository.save(reserva);
+        return mapToDto(reservaRepository.save(reserva));
     }
 
-    public Reserva add(Reserva reserva) {
-        return reservaRepository.save(reserva);
+    public ReservaDto add(Reserva reserva) {
+        return mapToDto(reservaRepository.save(reserva));
     }
 
-    public Reserva update(Long id, Reserva reserva) {
+    public ReservaDto actualizarReserva(
+            Long reserva_id,
+            LocalDateTime fecha_checkin,
+            LocalDateTime fecha_checkout) {
+        Reserva reserva = reservaRepository.findById(reserva_id).orElseThrow();
+
+        reserva.setFecha_checkin(fecha_checkin);
+        reserva.setFecha_checkout(fecha_checkout);
+
+        return mapToDto(reservaRepository.save(reserva));
+    }
+
+    public ReservaDto update(Long id, Reserva reserva) {
         Optional<Reserva> opt = reservaRepository.findById(id);
 
         if (opt.isEmpty()) {
@@ -65,11 +89,19 @@ public class ReservaService {
         r.setFecha_checkin(reserva.getFecha_checkin());
         r.setFecha_checkout(reserva.getFecha_checkout());
 
-        return reservaRepository.save(r);
+        return mapToDto(reservaRepository.save(r));
     }
 
     public void delete(Long id) {
         Reserva r = reservaRepository.findById(id).orElseThrow();
         reservaRepository.delete(r);
+    }
+
+    public void deleteByClienteId(Long clienteId) {
+        reservaRepository.deleteAll(reservaRepository.findByCliente_Id(clienteId));
+    }
+
+    public void deleteByClienteIdAndHabitacionId(Long clienteId, Long habitacionId) {
+        reservaRepository.deleteAll(reservaRepository.findByCliente_IdAndHabitacion_Id(clienteId, habitacionId));
     }
 }
